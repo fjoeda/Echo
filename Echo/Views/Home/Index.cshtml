@@ -2,10 +2,10 @@
     ViewBag.Title = "Home";
 }
 
-@model Echo.Models.Information
+@model Echo.Models.Aircraft
 
 @{
-    Echo.Models.Information info = new Echo.Models.Information();
+    Echo.Models.Aircraft info = new Echo.Models.Aircraft();
 
 }
 
@@ -32,6 +32,7 @@
 
             //addPin();
             mapPassangerLocation();
+            mapPesawat();
         }
 
         function addPin() {
@@ -66,13 +67,7 @@
                     visible: true
                 });
 
-                //Model.NamaInfo = e.title;
-
-
-                if (e.title == "Passenger Information") {
-                    
-                }
-                
+                           
 
             }
             manyPin();
@@ -106,7 +101,7 @@
             var url = "/Info/UpdateListPassenger";
             $.getJSON(url, null, function (data) {
                 $.each(data, function (index, PassengerData) {
-                    var passengerPin = new Microsoft.Maps.Pushpin(map.getCenter(), null);
+                    var passengerPin = new Microsoft.Maps.Pushpin(map.getCenter(), {color : 'red'});
 
                     passengerPin.setLocation(new Microsoft.Maps.Location(Number(PassengerData.latitude),
                         Number(PassengerData.longitude)));
@@ -114,9 +109,9 @@
                     passengerPin.metadata = {
                         title: "Status: " + PassengerData.condition,
                         description:    
-                        "Name : " + PassengerData.name + 
-                        "<br> Heartrate : " + PassengerData.heartrate + 
-                        "<br> Temperature : " + PassengerData.temperature 
+                        "Name : " + PassengerData.name + "<br>"+
+                        "Heartrate : " + PassengerData.heartrate + "<br>" +
+                        "Temperature : " + PassengerData.temperature 
 
                     };
                     Microsoft.Maps.Events.addHandler(passengerPin, 'click', pushpinClicked);
@@ -125,10 +120,35 @@
             });
         }
 
+        function showAircraftDetail(e) {
+            $('#user_content').load('@Url.Action("ShowAircraft", "Info")');
+            
+        }
+
+        function mapPesawat() {
+            var url = "/Info/MapAircraft";
+            $.getJSON(url, null, function (data) {
+                $.each(data, function (index, aircraftData) {
+                    var aircraftPin = new Microsoft.Maps.Pushpin(map.getCenter(), { icon: 'https://www.iconsdb.com/icons/download/orange/airplane-3-16.png', anchor: new Microsoft.Maps.Point(12, 39)});
+
+                    aircraftPin.setLocation(new Microsoft.Maps.Location(Number(aircraftData.Latitude),
+                        Number(aircraftData.Longitude)));
+
+                   
+                    Microsoft.Maps.Events.addHandler(aircraftPin, 'click', showAircraftDetail);
+                    map.entities.push(aircraftPin);
+                });
+            });
+        }
+
     </script>
     <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?callback=LoadMap" async defer></script>
 
 </div>
-@Html.Partial("~/Views/Info/_Information.cshtml",info);
+@Html.Partial("~/Views/Info/_Information.cshtml", Model, new ViewDataDictionary(Html.ViewData)
+{
+    TemplateInfo = new TemplateInfo { HtmlFieldPrefix = Html.NameFor(m => m.Nama).ToString() }
+})
+
 
 

@@ -9,11 +9,24 @@ namespace Echo.Controllers
 {
     public class HomeController : Controller
     {
-        Information info = new Information();
+        //Informationlnkl info = new Informationlnkl();
+
+        Aircraft pesawat = new Aircraft()
+        {
+            Nama = "Garuda Indonesia Airways",
+            FlightNumber = "GA-201",
+            Model = "B737-800",
+            Asal = "Yogyakarta (JOG)",
+            Tujuan = "Jakarta (CGK)",
+            Latitude = -5.670402f,
+            Longitude = 108.176275f,
+            Status = "Contact Lost 15 Minutes Ago"
+
+        };
         public ActionResult Index()
         {
             //info.NamaInfo = "Information Field";
-            return View(info);
+            return View(pesawat);
         }
 
         public ActionResult About()

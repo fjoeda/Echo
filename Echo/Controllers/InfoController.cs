@@ -17,18 +17,24 @@ namespace Echo.Controllers
     public class InfoController : Controller
     {
         // GET: Info
-        Information info = new Information();
+        //Informationlnkl info = new Informationlnkl();
         List<Aircraft> daftarPesawat = new List<Aircraft>();
         List<Passenger> daftarPenumpang = new List<Passenger>();
 
-
-        public ActionResult _Information(string str)
+        Aircraft pesawat = new Aircraft()
         {
-            info.NamaInfo = str;
+            Nama = "Garuda Indonesia Airways",
+            FlightNumber = "GA-201",
+            Model = "B737-800",
+            Asal = "Yogyakarta (JOG)",
+            Tujuan = "Jakarta (CGK)",
+            Latitude = -5.670402f,
+            Longitude = 108.176275f,
+            Status = "Contact Lost 15 Minutes Ago"
 
-            return View(info);
+        };
 
-        }
+        
 
         public async Task<ActionResult> UpdateListPassenger()
         {
@@ -134,5 +140,26 @@ namespace Echo.Controllers
 
             return Json(JsonList, JsonRequestBehavior.AllowGet);
         }
+
+
+        public ActionResult MapAircraft()
+        {
+            
+            var JsonList = new List<Aircraft>()
+            {
+                pesawat
+            };
+
+            //ShowAircraft(pesawat);
+            return Json(JsonList, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult ShowAircraft()
+        {
+            
+            return PartialView("_Information", pesawat);
+        }
+
+        
     }
 }
