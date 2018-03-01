@@ -1,0 +1,37 @@
+﻿@model Echo.Models.Information
+
+<div class="row">
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">Information Field</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h4>@Model.NamaObjek</h4>
+                        <h5>@Model.Atribut1</h5>
+                        <h5>@Model.Atribut2</h5>
+                        <div class="row">
+                            <div class="col-xs-8 col-sm-6">
+                                @Model.Atribut3
+                            </div>
+                            <div class="col-xs-4 col-sm-6">
+                                @Model.Atribut4
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h4>@Model.Status</h4>
+                        <h5>@Model.Timeframe </h5>
+                        <h5>@Model.Lat </h5>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
