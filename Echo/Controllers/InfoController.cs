@@ -5,6 +5,13 @@ using System.Web;
 using System.Web.Mvc;
 using System.Timers;
 using Echo.Models;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
+using System.Threading.Tasks;
+using Microsoft.Azure;
+using Microsoft.WindowsAzure.Storage.Auth;
+using System.Diagnostics;
+
 namespace Echo.Controllers
 {
     public class InfoController : Controller
@@ -14,19 +21,85 @@ namespace Echo.Controllers
         List<Aircraft> daftarPesawat = new List<Aircraft>();
         List<Passenger> daftarPenumpang = new List<Passenger>();
 
-        
 
         public ActionResult _Information(string str)
         {
             info.NamaInfo = str;
-            
+
             return View(info);
-            
+
         }
 
-        public ActionResult UpdateListPassenger()
+        public async Task<ActionResult> UpdateListPassenger()
         {
             daftarPenumpang.Clear();
+
+            try
+            {
+                String accountName = "echoiotstorage";
+                String accountKey = "iK+YbzvkYKxpn1fwoQOCyIiMjFwjtklq/4gIJCj64MqHt1IPhtw9Wb5101gzpUd+7/FT9vyWDNEOdRDF1CDXLQ==";
+
+                StorageCredentials creds = new StorageCredentials(accountName, accountKey);
+                CloudStorageAccount storageAccount = new CloudStorageAccount(creds, useHttps: true);
+
+                // Create the table client.
+                CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+
+                // Get a reference to a table named "EchoRecords"
+                CloudTable echoTable = tableClient.GetTableReference("EchoRecords");
+                Debug.WriteLine("Connection Succes!");
+
+                /*
+                // Construct the query operation for all customer entities where PartitionKey="Smith".
+                var query = new TableQuery().Take(1);
+                var result = echoTable.ExecuteQuery(query).ToList();
+                if (result != null && result.Count > 0)
+                {
+                    var dynamicTableEntity = result[0];
+                    foreach (var property in dynamicTableEntity.Properties)
+                    {
+                        Debug.WriteLine(property.Key + " = " + property.Value.PropertyType);
+                    }
+                }
+                
+                */
+                
+                // Construct the query operation for all customer entities where PartitionKey="Smith".
+                TableQuery<EchoRecords> query = new TableQuery<EchoRecords>();
+
+                // Print the fields for each customer.
+                TableContinuationToken token = null;
+                do
+                {
+                    TableQuerySegment<EchoRecords> resultSegment = await echoTable.ExecuteQuerySegmentedAsync(query, token);
+                    token = resultSegment.ContinuationToken;
+                    int i = 0;
+                    foreach (EchoRecords entity in resultSegment.Results)
+                    {
+                        Debug.WriteLine("{0}, {1}\t{2}\t{3}\t{4}\t{5}", entity.PartitionKey, entity.RowKey,
+                        entity.heartbeat.ToString(), entity.temperature.ToString(), entity.latitude.ToString(), entity.longitude.ToString());
+                        daftarPenumpang.Add(new Passenger()
+                        {
+                            name = "Passenger " + i,
+                            id = i,
+                            heartrate = int.Parse(entity.heartbeat.ToString()),
+                            temperature = int.Parse(entity.temperature.ToString()),
+                            latitude = -6.2223623f,
+                            longitude = 106.8052861f,
+                            condition = "Alive"
+                        });
+                        i++;
+                    }
+                } while (token != null);
+              
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+
             daftarPenumpang.Add(new Passenger()
             {
                 name = "Victima",
