@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Echo.Models;
 
 namespace Echo.Controllers
 {
     public class HomeController : Controller
     {
+        Information info = new Information();
         public ActionResult Index()
         {
-            return View();
+            //info.NamaInfo = "Information Field";
+            return View(info);
         }
 
         public ActionResult About()
@@ -26,5 +29,7 @@ namespace Echo.Controllers
 
             return View();
         }
+
+        
     }
 }
