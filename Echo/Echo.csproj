@@ -170,6 +170,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Aircraft.cs" />
+    <Compile Include="Models\EchoRecords.cs" />
     <Compile Include="Models\Location.cs" />
     <Compile Include="Models\Passenger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

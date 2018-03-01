@@ -27,5 +27,5 @@ namespace Echo.Models
         public Double longitude { get; set; }
 
         public Double latitude { get; set; }
-    }   
+    }
 }
