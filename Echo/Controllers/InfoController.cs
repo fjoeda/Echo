@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage.Auth;
 using System.Diagnostics;
+using Echo.Services.EchoService;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json.Linq;
 
 namespace Echo.Controllers
 {
@@ -39,7 +42,9 @@ namespace Echo.Controllers
         public async Task<ActionResult> UpdateListPassenger()
         {
             daftarPenumpang.Clear();
+            object[] hasilAkhir;
 
+            string cond = "";
             try
             {
                 String accountName = "echoiotstorage";
@@ -55,6 +60,7 @@ namespace Echo.Controllers
                 CloudTable echoTable = tableClient.GetTableReference("EchoRecords");
                 Debug.WriteLine("Connection Succes!");
 
+                
                 /*
                 // Construct the query operation for all customer entities where PartitionKey="Smith".
                 var query = new TableQuery().Take(1);
@@ -79,33 +85,72 @@ namespace Echo.Controllers
                 {
                     TableQuerySegment<EchoRecords> resultSegment = await echoTable.ExecuteQuerySegmentedAsync(query, token);
                     token = resultSegment.ContinuationToken;
-                    int i = 0;
+                    int i = 1;
                     foreach (EchoRecords entity in resultSegment.Results)
                     {
-                        Debug.WriteLine("{0}, {1}\t{2}\t{3}\t{4}\t{5}", entity.PartitionKey, entity.RowKey,
-                        entity.heartbeat.ToString(), entity.temperature.ToString(), entity.latitude.ToString(), entity.longitude.ToString());
-                        daftarPenumpang.Add(new Passenger()
-                        {
-                            name = "Passenger " + i,
-                            id = i,
-                            heartrate = int.Parse(entity.heartbeat.ToString()),
-                            temperature = float.Parse(entity.temperature.ToString()),
-                            latitude = -6.2223623f,
-                            longitude = 106.8052861f,
-                            condition = "Alive"
-                        });
+                        if (i == 1) { // just get the first data
+                            Debug.WriteLine("{0}, {1}\t{2}\t{3}\t{4}\t{5}", entity.PartitionKey, entity.RowKey,
+                                entity.heartbeat.ToString(), entity.temperature.ToString(), entity.latitude.ToString(), entity.longitude.ToString());
+
+                            int hr, temp;
+                            hr = int.Parse(entity.heartbeat.ToString());
+                            temp = int.Parse(entity.temperature.ToString());
+
+                            String str = new ConditionPredictionService().InvokeRequestResponseService(hr, temp).Result.ToString();
+
+                            Debug.WriteLine("Result: " + str);
+                            var js = new JavaScriptSerializer();
+
+                            RestSharp.Deserializers.JsonDeserializer deserial = new RestSharp.Deserializers.JsonDeserializer();
+
+                            System.Collections.Generic.Dictionary<string, object> d = js.Deserialize<dynamic>(str);
+                            Dictionary<string, object> json = (Dictionary<string, object>)d["Results"];
+                            Dictionary<string, object> json2 = (Dictionary<string, object>)json["output1"];
+                            Dictionary<string, object> json3 = (Dictionary<string, object>)json2["value"];
+                            object[] result = (object[])json3["Values"];
+                            hasilAkhir = (object[])result[0];
+
+
+                            switch (hasilAkhir[6])
+                            {
+                                case 1:
+                                    cond = "Alive";
+                                    break;
+                                case 2:
+                                    cond = "Critical";
+                                    break;
+                                case 3:
+                                    cond = "Dead";
+                                    break;
+                            }
+
+
+                            daftarPenumpang.Add(new Passenger()
+                            {
+                                name = "Passenger " + i,
+                                id = i,
+                                heartrate = hr,
+                                temperature = temp,
+                                latitude = -6.2223623f,
+                                longitude = 106.8052861f,
+                                condition = cond
+                            });
+                        }
+                        
                         i++;
                     }
                 } while (token != null);
-              
+
                 
+
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Debug.WriteLine(ex);
             }
 
-
+            Debug.WriteLine("ADD Passenger");
+            /*
             daftarPenumpang.Add(new Passenger()
             {
                 name = "Victima",
@@ -116,6 +161,8 @@ namespace Echo.Controllers
                 longitude = 106.8052861f,
                 condition = "Alive"
             });
+
+            */
 
 
             return Json(daftarPenumpang, JsonRequestBehavior.AllowGet);
