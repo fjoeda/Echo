@@ -89,7 +89,7 @@ namespace Echo.Controllers
                             name = "Passenger " + i,
                             id = i,
                             heartrate = int.Parse(entity.heartbeat.ToString()),
-                            temperature = int.Parse(entity.temperature.ToString()),
+                            temperature = float.Parse(entity.temperature.ToString()),
                             latitude = -6.2223623f,
                             longitude = 106.8052861f,
                             condition = "Alive"
